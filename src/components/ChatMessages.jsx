@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import MessageBubble from "./MessageBubble";
 import { formatDate } from "../utils/time";
 import { motion, AnimatePresence } from "framer-motion";
+import TypingIndicator from "./TypingIndicator";
 
 
 export default function ChatMessages({ messages, botTyping }) {
@@ -42,11 +43,7 @@ export default function ChatMessages({ messages, botTyping }) {
                 );
             })}
 
-            {botTyping && (
-                <div className="mr-auto bg-gray-200 px-4 py-2 rounded-lg text-sm italic">
-                    Bot is typing...
-                </div>
-            )}
+            {botTyping && <TypingIndicator />}
 
             <div ref={bottomRef} />
         </AnimatePresence>
