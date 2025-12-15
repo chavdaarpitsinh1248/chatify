@@ -20,6 +20,8 @@ export default function ChatInput({ dispatch }) {
 
         setText("");
 
+        dispatch({ type: "BOT_TYPING", payload: true });
+
         setTimeout(() => {
             dispatch({
                 type: "BOT_REPLY",
@@ -30,6 +32,8 @@ export default function ChatInput({ dispatch }) {
                     timestamp: new Date(),
                 },
             });
+
+            dispatch({ type: "BOT_TYPING", payload: false });
         }, 1000);
     };
 
