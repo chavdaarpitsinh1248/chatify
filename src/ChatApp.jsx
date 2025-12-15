@@ -11,7 +11,10 @@ export default function ChatApp() {
     return (
         <div className="h-screen flex flex-col max-w-md mx-auto border-x bg-white">
             <ChatHeader />
-            <ChatMessages messages={state.messages} />
+            <ChatMessages
+                messages={state.messages}
+                botTyping={state.botTyping}
+            />
             <ChatInput dispatch={dispatch} />
         </div>
     );

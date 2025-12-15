@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export default function ChatMessages({ messages }) {
+export default function ChatMessages({ messages, botTyping }) {
     const bottomRef = useRef(null);
 
     // auto scroll
@@ -23,6 +23,11 @@ export default function ChatMessages({ messages }) {
                     {msg.text}
                 </div>
             ))}
+            {botTyping && (
+                <div className="mr-auto bg-gray-200 px-4 py-2 rounded-lg text-sm italic">
+                    Bot is typing...
+                </div>
+            )}
             <div ref={bottomRef} />
         </div>
     );
