@@ -1,12 +1,11 @@
-import { useReducer } from "react";
 import ChatHeader from "./components/ChatHeader";
 import ChatMessages from "./components/ChatMessages";
 import ChatInput from "./components/ChatInput";
-import { chatReducer, initialState } from "./chatReducer";
+import useChat from "./hooks/useChat";
 
 
 export default function ChatApp() {
-    const [state, dispatch] = useReducer(chatReducer, initialState);
+    const [state, dispatch] = useChat();
 
     return (
         <div className="h-screen flex flex-col max-w-md mx-auto border-x bg-white">
