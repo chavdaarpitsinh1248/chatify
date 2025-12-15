@@ -16,36 +16,37 @@ export default function ChatMessages({ messages, botTyping }) {
     let lastDate = "";
 
     return (
-        <AnimatePresence>
-            {messages.map((msg) => {
-                const currentDate = formatDate(msg.timestamp);
-                const showDate = currentDate !== lastDate;
-                lastDate = currentDate;
+        <>
+            <AnimatePresence>
+                {messages.map((msg) => {
+                    const currentDate = formatDate(msg.timestamp);
+                    const showDate = currentDate !== lastDate;
+                    lastDate = currentDate;
 
-                return (
-                    <motion.div
-                        key={msg.id}
-                        layout
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                    >
-                        {showDate && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="text-center text-xs text-gray-500 my-2"
-                            >
-                                {currentDate}
-                            </motion.div>
-                        )}
-                        <MessageBubble msg={msg} />
-                    </motion.div>
-                );
-            })}
+                    return (
+                        <motion.div
+                            key={msg.id}
+                            layout
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                        >
+                            {showDate && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="text-center text-xs text-gray-500 my-2"
+                                >
+                                    {currentDate}
+                                </motion.div>
+                            )}
+                            <MessageBubble msg={msg} />
+                        </motion.div>
+                    );
+                })}
 
-            {botTyping && <TypingIndicator />}
-
+                {botTyping && <TypingIndicator />}
+            </AnimatePresence>
             <div ref={bottomRef} />
-        </AnimatePresence>
+        </>
     );
 }

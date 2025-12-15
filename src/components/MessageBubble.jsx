@@ -1,7 +1,8 @@
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { formatTime } from "../utils/time";
 
-export default function MessageBubble({ msg }) {
+function MessageBubble({ msg }) {
     const isUser = msg.sender === "user";
 
     return (
@@ -23,3 +24,5 @@ export default function MessageBubble({ msg }) {
         </motion.div>
     );
 }
+
+export default memo(MessageBubble);
