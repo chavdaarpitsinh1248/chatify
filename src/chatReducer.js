@@ -17,6 +17,12 @@ export function chatReducer(state, action) {
                 messages: [...state.messages, action.payload],
             };
 
+        case "BOT_REPLY":
+            return {
+                ...state,
+                messages: [...state.messages, action.payload],
+            };
+
         default: return state;
     }
 }

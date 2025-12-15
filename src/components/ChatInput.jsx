@@ -22,7 +22,7 @@ export default function ChatInput({ dispatch }) {
     return (
         <div className="p-4 border-t bg-white flex gap-2">
             <input
-                value="text"
+                value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                 placeholder="Type a message..."
