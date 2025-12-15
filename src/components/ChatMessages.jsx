@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import MessageBubble from "./MessageBubble";
 import { formatDate } from "../utils/time";
+import { motion, AnimatePresence } from "framer-motion";
 
 
 export default function ChatMessages({ messages, botTyping }) {
@@ -14,21 +15,30 @@ export default function ChatMessages({ messages, botTyping }) {
     let lastDate = "";
 
     return (
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+        <AnimatePresence>
             {messages.map((msg) => {
                 const currentDate = formatDate(msg.timestamp);
                 const showDate = currentDate !== lastDate;
                 lastDate = currentDate;
 
                 return (
-                    <div key={msg.id}>
+                    <motion.div
+                        key={msg.id}
+                        layout
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                    >
                         {showDate && (
-                            <div className="text-center text-xs text-gray-500 my-2">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-center text-xs text-gray-500 my-2"
+                            >
                                 {currentDate}
-                            </div>
+                            </motion.div>
                         )}
                         <MessageBubble msg={msg} />
-                    </div>
+                    </motion.div>
                 );
             })}
 
@@ -39,6 +49,6 @@ export default function ChatMessages({ messages, botTyping }) {
             )}
 
             <div ref={bottomRef} />
-        </div>
+        </AnimatePresence>
     );
 }
