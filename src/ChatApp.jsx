@@ -5,7 +5,7 @@ import useChat from "./hooks/useChat";
 
 
 export default function ChatApp() {
-    const [state, dispatch] = useChat();
+    const { state, dispatch } = useChat();
 
     return (
         <div className="h-screen flex flex-col max-w-md mx-auto border-x bg-white">
