@@ -6,18 +6,43 @@ export default function ChatInput({ dispatch }) {
     const sendMessage = () => {
         if (!text.trim()) return;
 
+        const userMessage = {
+            id: Date.now(),
+            text,
+            sender: "user",
+            timestamp: new Date(),
+        };
+
         dispatch({
             type: "SEND_MESSAGE",
-            payload: {
-                id: Date.now(),
-                text,
-                sender: "user",
-                timestamp: new Date(),
-            },
+            payload: userMessage
         });
 
         setText("");
+
+        setTimeout(() => {
+            dispatch({
+                type: "BOT_REPLY",
+                payload: {
+                    id: Date.now() + 1,
+                    text: getRandomReply(),
+                    sender: "bot",
+                    timestamp: new Date(),
+                },
+            });
+        }, 1000);
     };
+
+    const botReplies = [
+        "Nice to hear from you 🙂",
+        "Tell me more!",
+        "That's interesting 🤔",
+        "I'm just a fake bot, but I'm learning!",
+        "Cool! 🚀",
+    ];
+
+    const getRandomReply = () =>
+        botReplies[Math.floor(Math.random() * botReplies.length)];
 
     return (
         <div className="p-4 border-t bg-white flex gap-2">
