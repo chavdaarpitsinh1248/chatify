@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export default function ChatInput({ dispatch }) {
     const [text, setText] = useState("");
 
-    const sendMessage = () => {
+    const sendMessage = useCallback(() => {
         if (!text.trim()) return;
 
         const userMessage = {
@@ -35,7 +35,7 @@ export default function ChatInput({ dispatch }) {
 
             dispatch({ type: "BOT_TYPING", payload: false });
         }, 1000);
-    };
+    }, [text, dispatch]);
 
     const botReplies = [
         "Nice to hear from you 🙂",
