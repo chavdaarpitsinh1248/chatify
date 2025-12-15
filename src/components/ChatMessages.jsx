@@ -7,6 +7,7 @@ import TypingIndicator from "./TypingIndicator";
 
 export default function ChatMessages({ messages, botTyping }) {
     const bottomRef = useRef(null);
+    const visibleMessage = messages.slice(-50);
 
     // auto scroll
     useEffect(() => {
@@ -18,7 +19,7 @@ export default function ChatMessages({ messages, botTyping }) {
     return (
         <>
             <AnimatePresence>
-                {messages.map((msg) => {
+                {visibleMessage.map((msg) => {
                     const currentDate = formatDate(msg.timestamp);
                     const showDate = currentDate !== lastDate;
                     lastDate = currentDate;
