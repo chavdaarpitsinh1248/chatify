@@ -1,3 +1,5 @@
+require("dotenv").config();
+const mongoose = require("mongoose");
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -16,6 +18,11 @@ const io = new Server(server, {
 });
 
 let users = {};
+
+mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => console.log("MongoDB connected"))
+    .catch((err) => console.error(err));
 
 io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
