@@ -7,6 +7,7 @@ export const initialState = {
             timestamp: new Date(),
         },
     ],
+    botTyping: false,
 };
 
 export function chatReducer(state, action) {
@@ -21,6 +22,12 @@ export function chatReducer(state, action) {
             return {
                 ...state,
                 messages: [...state.messages, action.payload],
+            };
+
+        case "BOT_TYPING":
+            return {
+                ...state,
+                botTyping: action.payload
             };
 
         default: return state;
