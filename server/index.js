@@ -54,8 +54,10 @@ io.on("connection", (socket) => {
 
     socket.on("sendMessage", (message) => {
         io.emit("receiveMessage", {
-            ...message,
-            sender: socket.user.email,
+            id: Date.now(),
+            text: message.text,
+            sender: socket.user.username,
+            userId: socket.user.id,
             timestamp: new Date(),
         });
     });
@@ -64,6 +66,7 @@ io.on("connection", (socket) => {
         console.log("User disconnected:", socket.user.email);
     });
 });
+
 
 
 
