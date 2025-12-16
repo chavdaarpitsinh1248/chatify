@@ -51,26 +51,20 @@ io.use((socket, next) => {
 io.on("connection", (socket) => {
     console.log("User connected:", socket.user.email);
 
-    socket.on("join", (username) => {
-        users[socket.id] = username;
-        io.emit("users", Object.values(users));
-    });
-
-    socket.on("sendMessage", (text) => {
+    socket.on("sendMessage", (message) => {
         io.emit("receiveMessage", {
-            text,
-            sender: socket.user.email,
             id: Date.now(),
+            text: message.text,
+            sender: socket.user.email,
             timestamp: new Date(),
         });
     });
 
     socket.on("disconnect", () => {
-        delete users[socket.id];
-        io.emit("users", Object.values(users));
-        console.log("User disconnected");
+        console.log("User disconnected:", socket.user.email);
     });
 });
+
 
 server.listen(5000, () =>
     console.log("Server running on http://localhost:5000")
