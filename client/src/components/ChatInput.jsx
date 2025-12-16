@@ -1,34 +1,36 @@
-import { useState, useCallback } from "react";
-
-export default function ChatInput({ socket, username }) {
+export default function ChatInput({
+    socket,
+    username,
+    serverId,
+    channelId,
+}) {
     const [text, setText] = useState("");
 
     const sendMessage = () => {
         if (!text.trim()) return;
 
-        socket.emit("sendServerMessage", {
+        socket.emit("sendChannelMessage", {
             serverId,
-            message: { text, sender: username },
+            channelId,
+            message: {
+                sender: username,
+                text,
+            },
         });
 
         setText("");
     };
 
-
     return (
-        <div className="p-4 border-t bg-white flex gap-2">
+        <div className="p-3 border-t flex gap-2">
             <input
+                className="flex-1 border px-3 py-2 rounded"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                placeholder="Type a message..."
-                className="flex-1 border rounded-lg px-3 py-2 focus:outline-none"
+                placeholder={`Message #${channelId}`}
             />
-            <button
-                onClick={sendMessage}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg">
-                Send
-            </button>
+            <button onClick={sendMessage}>Send</button>
         </div>
     );
 }
