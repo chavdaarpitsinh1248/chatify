@@ -10,6 +10,9 @@ app.use(cors());
 app.use(express.json())
 app.use("/api/auth", require("./routes/auth"));
 
+const protectedRoutes = require("./routes/protected");
+app.use("/api/protected", protectedRoutes);
+
 const server = http.createServer(app);
 
 const io = new Server(server, {
