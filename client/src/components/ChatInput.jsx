@@ -6,9 +6,9 @@ export default function ChatInput({ socket, username }) {
     const sendMessage = () => {
         if (!text.trim()) return;
 
-        socket.emit("sendMessage", {
-            text,
-            sender: username,
+        socket.emit("sendServerMessage", {
+            serverId,
+            message: { text, sender: username },
         });
 
         setText("");

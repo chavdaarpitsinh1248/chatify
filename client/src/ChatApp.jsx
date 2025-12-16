@@ -1,62 +1,67 @@
 import { useEffect, useState } from "react";
 import socket from "./socket";
-import ChatHeader from "./components/ChatHeader";
-import ChatMessages from "./components/ChatMessages";
-import ChatInput from "./components/ChatInput";
-import useChat from "./hooks/useChat";
+
+import ServerList from "./components/ServerList";
+import ChatPanel from "./components/ChatPanel";
 import JoinChat from "./components/JoinChat";
 
-
 export default function ChatApp() {
-    const { state, dispatch } = useChat();
     const [username, setUsername] = useState("");
-    const [messages, setMessages] = useState([]);
-    const [users, setUsers] = useState([]);
+    const [token, setToken] = useState(null);
+    const [currentServer, setCurrentServer] = useState(null);
 
+    // Example: restore auth from localStorage (adjust to your auth logic)
     useEffect(() => {
-        socket.on("receiveMessage", (msg) => {
-            setMessages((prev) => [...prev, msg]);
-        });
+        const savedUser = localStorage.getItem("username");
+        const savedToken = localStorage.getItem("token");
 
-        socket.on("users", setUsers);
-
-        return () => {
-            socket.off("receiveMessage");
-            socket.off("users");
-        };
-
+        if (savedUser && savedToken) {
+            setUsername(savedUser);
+            setToken(savedToken);
+        }
     }, []);
 
-    const [socket, setSocket] = useState(null);
+    // Join server via socket
+    const handleJoinServer = (server) => {
+        setCurrentServer(server);
 
-    useEffect(() => {
-        if (!username) return;
-        const s = connectSocket(user.token);
-        setSocket(s);
-
-        s.on("receiveMessage", msg => setMessages(prev => [...prev, msg]));
-        s.on("users", setUsers);
-
-        return () => disconnectSocket();
-    }, [username]);
-
-
-    const joinChat = (name) => {
-        setUsername(name);
-        socket.emit("join", name);
+        socket.emit("joinServer", {
+            serverId: server._id,
+            username,
+        });
     };
 
-    if (!username) return <JoinChat onJoin={joinChat} />;
+    // If user is NOT authenticated yet
+    if (!username || !token) {
+        return (
+            <JoinChat
+                onJoin={(name, jwtToken) => {
+                    setUsername(name);
+                    setToken(jwtToken);
+                    localStorage.setItem("username", name);
+                    localStorage.setItem("token", jwtToken);
+                }}
+            />
+        );
+    }
 
     return (
-        <div className="h-screen flex flex-col max-w-md mx-auto border-x bg-white">
-            <ChatHeader />
-            <div className="flex-1 overflow-y-auto">
-                <ChatMessages
-                    messages={state.messages}
+        <div className="flex h-screen bg-white">
+            {/* LEFT SIDEBAR — SERVERS */}
+            <ServerList token={token} onSelect={handleJoinServer} />
+
+            {/* MAIN CHAT AREA */}
+            {currentServer ? (
+                <ChatPanel
+                    server={currentServer}
+                    username={username}
+                    socket={socket}
                 />
-            </div>
-            <ChatInput socket={socket} username={username} />
+            ) : (
+                <div className="flex-1 flex items-center justify-center text-gray-500">
+                    Select a server to start chatting
+                </div>
+            )}
         </div>
     );
 }
