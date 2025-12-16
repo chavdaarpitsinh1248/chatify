@@ -56,9 +56,10 @@ io.on("connection", (socket) => {
         io.emit("users", Object.values(users));
     });
 
-    socket.on("sendMessage", (message) => {
+    socket.on("sendMessage", (text) => {
         io.emit("receiveMessage", {
-            ...message,
+            text,
+            sender: socket.user.email,
             id: Date.now(),
             timestamp: new Date(),
         });
