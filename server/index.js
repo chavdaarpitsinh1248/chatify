@@ -56,20 +56,36 @@ io.use((socket, next) => {
 
 
 io.on("connection", (socket) => {
-    console.log("User connected:", socket.user.email);
+    console.log("User connected:", socket.id);
 
-    socket.on("sendMessage", (message) => {
-        io.emit("receiveMessage", {
-            id: crypto.randomUUID(),
-            text: message.text,
-            sender: socket.user.username,
-            userId: socket.user.id,
+    socket.on("joinServer", ({ serverId, username }) => {
+        socket.join(serverId);
+        socket.username = username;
+        socket.serverId = serverId;
+        io.to(serverId).emit("serverMessage", {
+            sender: "System",
+            text: `${username} joined the server`,
+            timeStamp: new Date(),
+        });
+    });
+
+    socket.on("sendServerMessage", ({ serverId, message }) => {
+        io.to(serverId).emit("serverMessage", {
+            ...message,
+            id: Date.now(),
             timestamp: new Date(),
         });
     });
 
     socket.on("disconnect", () => {
-        console.log("User disconnected:", socket.user.email);
+        const { serverId, username } = socket;
+        if (serverId && username) {
+            io.to(serverId).emit("serverMessage", {
+                sender: "System",
+                text: `${username} left the server`,
+                timestamp: new Date(),
+            });
+        }
     });
 });
 
