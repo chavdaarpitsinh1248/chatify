@@ -56,38 +56,27 @@ io.use((socket, next) => {
 
 
 io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
+    socket.on("joinChannel", ({ serverId, channelId, username }) => {
+        const room = `${serverId}:${channelId}`;
+        socket.join(room);
 
-    socket.on("joinServer", ({ serverId, username }) => {
-        socket.join(serverId);
-        socket.username = username;
-        socket.serverId = serverId;
-        io.to(serverId).emit("serverMessage", {
+        io.to(room).emit("channelMessage", {
             sender: "System",
-            text: `${username} joined the server`,
-            timeStamp: new Date(),
+            text: `${username} joined the channel`,
+            timestamp: new Date(),
         });
     });
 
-    socket.on("sendServerMessage", ({ serverId, message }) => {
-        io.to(serverId).emit("serverMessage", {
+    socket.on("sendChannelMessage", ({ serverId, channelId, message }) => {
+        const room = `${serverId}:${channelId}`;
+        io.to(room).emit("channelMessage", {
             ...message,
             id: Date.now(),
             timestamp: new Date(),
         });
     });
-
-    socket.on("disconnect", () => {
-        const { serverId, username } = socket;
-        if (serverId && username) {
-            io.to(serverId).emit("serverMessage", {
-                sender: "System",
-                text: `${username} left the server`,
-                timestamp: new Date(),
-            });
-        }
-    });
 });
+
 
 
 
