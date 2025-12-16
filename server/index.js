@@ -39,13 +39,14 @@ io.use((socket, next) => {
     }
 
     try {
-        const decoded = JsonWebTokenError.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         socket.user = decoded; // { id, email }
         next();
     } catch (err) {
-        next(new Error("Authentication error"));
+        next(new Error("Invalid token"));
     }
 });
+
 
 
 io.on("connection", (socket) => {
@@ -53,8 +54,7 @@ io.on("connection", (socket) => {
 
     socket.on("sendMessage", (message) => {
         io.emit("receiveMessage", {
-            id: Date.now(),
-            text: message.text,
+            ...message,
             sender: socket.user.email,
             timestamp: new Date(),
         });
@@ -64,6 +64,7 @@ io.on("connection", (socket) => {
         console.log("User disconnected:", socket.user.email);
     });
 });
+
 
 
 server.listen(5000, () =>
