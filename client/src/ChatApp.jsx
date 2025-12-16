@@ -21,9 +21,25 @@ export default function ChatApp() {
         socket.on("users", setUsers);
 
         return () => {
-            socket.off();
+            socket.off("receiveMessage");
+            socket.off("users");
         };
+
     }, []);
+
+    const [socket, setSocket] = useState(null);
+
+    useEffect(() => {
+        if (!username) return;
+        const s = connectSocket(user.token);
+        setSocket(s);
+
+        s.on("receiveMessage", msg => setMessages(prev => [...prev, msg]));
+        s.on("users", setUsers);
+
+        return () => disconnectSocket();
+    }, [username]);
+
 
     const joinChat = (name) => {
         setUsername(name);

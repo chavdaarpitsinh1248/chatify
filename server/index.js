@@ -5,9 +5,13 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
 app.use(express.json())
 app.use("/api/auth", require("./routes/auth"));
 
@@ -23,7 +27,6 @@ const io = new Server(server, {
     },
 });
 
-let users = {};
 
 mongoose
     .connect(process.env.MONGO_URI)
@@ -54,7 +57,7 @@ io.on("connection", (socket) => {
 
     socket.on("sendMessage", (message) => {
         io.emit("receiveMessage", {
-            id: Date.now(),
+            id: crypto.randomUUID(),
             text: message.text,
             sender: socket.user.username,
             userId: socket.user.id,

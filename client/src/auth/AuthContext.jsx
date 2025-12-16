@@ -10,10 +10,12 @@ export function AuthProvider({ children }) {
         if (stored) setUser(JSON.parse(stored));
     }, []);
 
-    const login = (data) => {
-        setUser(data);
-        localStorage.setItem("user", JSON.stringify(data));
+    const login = ({ token, user }) => {
+        const authData = { token, user };
+        setUser(authData);
+        localStorage.setItem("user", JSON.stringify(authData));
     };
+
 
     const logout = () => {
         setUser(null);
@@ -27,4 +29,9 @@ export function AuthProvider({ children }) {
     );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+    const ctx = useContext(AuthContext);
+    if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+    return ctx;
+};
+

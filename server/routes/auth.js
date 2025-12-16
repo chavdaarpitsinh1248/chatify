@@ -12,6 +12,12 @@ router.post("/register", async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: "User already exists" });
+        }
+
+
         const user = await User.create({
             username,
             email,
@@ -29,18 +35,27 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ error: "Invaild credentials" });
+    if (!user) return res.status(400).json({ error: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ error: "Invaild credentials" });
+    if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
     const token = jwt.sign(
-        { id: user._id, username: user.username },
+        { id: user._id, email: user.email, username: user.username },
         process.env.JWT_SECRET,
-        { expiresIn: "1d" }
+        { expiresIn: "7d" }
     );
 
-    res.json({ token, username: user.username });
+
+    res.json({
+        token,
+        user: {
+            id: user._id,
+            username: user.username,
+            email: user.email
+        }
+    });
+
 });
 
 module.exports = router;
