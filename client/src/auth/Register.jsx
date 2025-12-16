@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { registerUser } from "../api/authApi";
-import { useAuth } from "./AuthContext";
 
-export default function Register() {
-    const { login } = useAuth();
+export default function Register({ onSwitch }) {
     const [form, setForm] = useState({
         username: "",
         email: "",
@@ -11,36 +9,43 @@ export default function Register() {
     });
 
     const submit = async () => {
-        const data = await registerUser(form);
-        if (data.token) login(data);
+        await registerUser(form);
+        onSwitch();
     };
 
     return (
-        <div className="h-screen flex items-center justify-center">
-            <div className="p-6 border rounded-lg w-80 space-y-3">
-                <h2 className="text-xl font-semibold">Create Account</h2>
+        <div className="space-y-4">
+            <h2 className="text-xl font-semibold">Register</h2>
 
-                <input
-                    placeholder="Useername"
-                    className="input"
-                    onChange={(e) => setForm({ ...form, username: e.target.value })}
-                />
-                <input
-                    placeholder="Email"
-                    className="input"
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    className="input"
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                />
+            <input
+                placeholder="Username"
+                className="w-full border px-3 py-2 rounded"
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
+            />
 
-                <button onClick={submit} className="btn-primary w-full">
-                    Register
+            <input
+                placeholder="Email"
+                className="w-full border px-3 py-2 rounded"
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+
+            <input
+                type="password"
+                placeholder="Password"
+                className="w-full border px-3 py-2 rounded"
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+            />
+
+            <button onClick={submit} className="w-full bg-green-600 text-white py-2 rounded">
+                Register
+            </button>
+
+            <p className="text-sm text-center">
+                Already have an account?{" "}
+                <button onClick={onSwitch} className="text-blue-600">
+                    Login
                 </button>
-            </div>
+            </p>
         </div>
     );
 }
