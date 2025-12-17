@@ -7,12 +7,21 @@ const router = express.Router();
 
 /* REGISTER */
 router.post("/register", async (req, res) => {
+
     const { username, email, password } = req.body;
+
+    if (!username || !email || !password) {
+        return res.status(400).json({ error: "All fields are required" });
+    }
+
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
+        const emailNormalized = email.toLowerCase();
+        const existingUser = await User.findOne({
+            $or: [{ email: emailNormalized }, { username }]
+        });
 
-        const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ error: "User already exists" });
         }
@@ -24,9 +33,12 @@ router.post("/register", async (req, res) => {
             password: hashedPassword,
         });
 
-        res.status(201).json({ message: "User registered" });
+        res.status(201).json({
+            message: "User registered",
+            user: { id: user._id, username: user.username, email: user.email }
+        });
     } catch (err) {
-        res.status(400).json({ error: "User already exists" });
+        res.status(400).json({ error: "Registration failed" });
     }
 });
 
@@ -34,7 +46,8 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const emailNormalized = email.toLowerCase();
+    const user = await User.findOne({ email: emailNormalized }).select("+password");
     if (!user) return res.status(400).json({ error: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
