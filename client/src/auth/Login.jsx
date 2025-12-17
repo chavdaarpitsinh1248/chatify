@@ -6,11 +6,27 @@ export default function Login({ onSwitch }) {
     const { login } = useAuth();
     const [form, setForm] = useState({ email: "", password: "" });
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const submit = async () => {
-        const res = await loginUser(form);
-        if (res.error) return setError(res.error);
-        login(res);
+        if (!form.email || !form.password) {
+            return setError("All fields are required");
+        }
+
+        setError("");
+        setLoading(true);
+
+        try {
+            const res = await loginUser({
+                email: form.email.trim().toLowerCase(),
+                password: form.password,
+            });
+            login(res);
+        } catch (err) {
+            setError(err.error || "Invalid credentials");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -32,8 +48,12 @@ export default function Login({ onSwitch }) {
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
-            <button onClick={submit} className="w-full bg-blue-600 text-white py-2 rounded">
-                Login
+            <button
+                onClick={submit}
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
+            >
+                {loading ? "Logging in..." : "Login"}
             </button>
 
             <p className="text-sm text-center">
