@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api/auth";
 
 export async function registerUser(data) {
     const res = await fetch(`${API_URL}/register`, {
@@ -7,7 +7,10 @@ export async function registerUser(data) {
         body: JSON.stringify(data),
     });
 
-    return res.json();
+    const result = await res.json();
+    if (!res.ok) throw result;
+
+    return result;
 }
 
 export async function loginUser(data) {
@@ -17,5 +20,8 @@ export async function loginUser(data) {
         body: JSON.stringify(data),
     });
 
-    return res.json();
+    const result = await res.json();
+    if (!res.ok) throw result;
+
+    return result;
 }
