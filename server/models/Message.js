@@ -31,4 +31,4 @@ const MessageSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-module.exports = mongoose.model("Message", MessageSchema.index({ serverId: 1, channel: 1 createdAt: 1 }));
+module.exports = mongoose.model("Message", MessageSchema.index({ serverId: 1, channel: 1, createdAt: 1 }));

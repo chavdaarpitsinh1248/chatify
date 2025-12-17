@@ -7,14 +7,23 @@ const auth = require("../middleware/auth");
 router.get("/:serverId/:channelId", auth, async (req, res) => {
     const { serverId, channelId } = req.params;
 
-    const messages = await Message.find({
-        serverId,
-        channelId,
-    })
-        .sort({ createAt: 1 })
-        .limit(100);
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(serverId) || !mongoose.Types.ObjectId.isValid(channelId)) {
+        return res.status(400).json({ error: "Invalid IDs" });
+    }
 
-    res.json(messages);
+    try {
+        const messages = await Message.find({
+            serverId,
+            channelId,
+        })
+            .sort({ createdAt: -1 })
+            .limit(100);
+
+        res.json(messages.reverser());
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch messages" });
+    }
 });
 
 module.exports = router;
