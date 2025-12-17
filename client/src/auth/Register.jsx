@@ -8,9 +8,30 @@ export default function Register({ onSwitch }) {
         password: "",
     });
 
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+
     const submit = async () => {
-        await registerUser(form);
-        onSwitch();
+        if (!form.username || !form.email || !form.password) {
+            return setError("All fields are required");
+        }
+
+        setError("");
+        setLoading(true);
+
+        try {
+            await registerUser({
+                username: form.username.trim(),
+                email: form.email.trim().toLowerCase(),
+                password: form.password,
+            });
+
+            onSwitch(); // go to Login on success
+        } catch (err) {
+            setError(err.error || "Registration failed");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -36,8 +57,14 @@ export default function Register({ onSwitch }) {
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
 
-            <button onClick={submit} className="w-full bg-green-600 text-white py-2 rounded">
-                Register
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+
+            <button
+                onClick={submit}
+                disabled={loading}
+                className="w-full bg-green-600 text-white py-2 rounded disabled:opacity-50"
+            >
+                {loading ? "Creating account..." : "Register"}
             </button>
 
             <p className="text-sm text-center">
