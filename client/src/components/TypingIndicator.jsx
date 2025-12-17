@@ -1,8 +1,12 @@
 import { motion } from "framer-motion";
 
-export default function TypingIndicator() {
+export default function TypingIndicator({ align = "left" }) {
     return (
-        <div className="mr-auto bg-gray-200 px-4 py-2 rounded-lg flex gap-1">
+        <div
+            className={`${align === "right" ? "ml-auto" : "mr-auto"
+                } bg-gray-200 px-4 py-2 rounded-lg flex gap-1`}
+            aria-label="Someone is typing"
+        >
             {[0, 1, 2].map((i) => (
                 <motion.span
                     key={i}
