@@ -3,43 +3,41 @@ import { getChannelMessages } from "../api/messageApi";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 
-export default function ChatPanel({
-    server,
-    channel,
-    socket,
-    token,
-    user,
-}) {
+export default function ChatPanel({ server, channel, socket, token, user }) {
     const [messages, setMessages] = useState([]);
 
-    // Load history
     useEffect(() => {
-        if (!channel) return;
+        if (!server || !channel) return;
+
+        setMessages([]); // reset when switching channels
 
         getChannelMessages(server._id, channel._id, token)
-            .then((res) => setMessages(res.data));
+            .then((res) => setMessages(res.data))
+            .catch(() => console.error("Failed to fetch messages"));
 
         socket.emit("joinChannel", {
             serverId: server._id,
             channelId: channel._id,
         });
 
-        socket.on("newChannelMessage", (msg) => {
-            setMessages((prev) => [...prev, msg]);
-        });
+        const handleNewMessage = (msg) => setMessages((prev) => [...prev, msg]);
+        socket.on("newChannelMessage", handleNewMessage);
 
-        return () => socket.off("newChannelMessage");
-    }, [channel]);
+        return () => socket.off("newChannelMessage", handleNewMessage);
+    }, [server?._id, channel?._id, socket, token]);
+
+    if (!server || !channel) return <div className="p-4">Select a channel</div>;
 
     return (
-        <>
-            <ChatMessages messages={messages} />
+        <div className="flex-1 flex flex-col h-full">
+            <ChatMessages messages={messages} currentUserId={user.id} />
             <ChatInput
                 socket={socket}
+                user={user}
                 serverId={server._id}
                 channelId={channel._id}
-                user={user}
+                channelName={channel.name}
             />
-        </>
+        </div>
     );
 }
