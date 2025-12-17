@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Message = require("../models/Message");
-const auth = require("../middleware/auth");
+const auth = require("../middleware/authMiddleware");
 
 // Get messages for a channel
 router.get("/:serverId/:channelId", auth, async (req, res) => {

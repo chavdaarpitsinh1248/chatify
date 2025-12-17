@@ -1,10 +1,11 @@
-require("dotenv").config();
-const mongoose = require("mongoose");
+require("dotenv").config(); // Load .env first
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
+
 const Message = require("./models/Message");
 
 const app = express();
@@ -12,7 +13,7 @@ const app = express();
 // Middleware
 app.use(cors({
     origin: "http://localhost:5173",
-    credentials: true
+    credentials: true,
 }));
 app.use(express.json());
 
@@ -33,18 +34,15 @@ const io = new Server(server, {
     },
 });
 
-// Connect to MongoDB
-mongoose
-    .connect(process.env.MONGO_URI)
+// Connect to MongoDB (Mongoose 7+ requires no options)
+mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("MongoDB connected"))
-    .catch((err) => console.error("MongoDB connection error:", err));
+    .catch(err => console.error("MongoDB connection error:", err));
 
 // Socket.IO authentication middleware
 io.use((socket, next) => {
     const token = socket.handshake.auth?.token;
-    if (!token) {
-        return next(new Error("Authentication error"));
-    }
+    if (!token) return next(new Error("Authentication error"));
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
