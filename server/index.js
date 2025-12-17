@@ -21,6 +21,9 @@ app.use("/apiservers", serverRoutes);
 const protectedRoutes = require("./routes/protected");
 app.use("/api/protected", protectedRoutes);
 
+const messageRoutes = require("./routes/messages");
+app.use("/api/messages", messageRoutes);
+
 const server = http.createServer(app);
 
 const io = new Server(server, {
