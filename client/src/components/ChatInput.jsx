@@ -1,19 +1,26 @@
+import { useState } from "react";
+
 export default function ChatInput({
     socket,
-    username,
+    user,
     serverId,
     channelId,
+    channelName,
 }) {
     const [text, setText] = useState("");
 
     const sendMessage = () => {
         if (!text.trim()) return;
+        if (!socket) return;
 
         socket.emit("sendChannelMessage", {
             serverId,
             channelId,
             text,
-            user,
+            user: {
+                id: user.id,
+                username: user.username,
+            },
         });
 
         setText("");
@@ -26,9 +33,14 @@ export default function ChatInput({
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                placeholder={`Message #${channelId}`}
+                placeholder={`Message #${channelName || "channel"}`}
             />
-            <button onClick={sendMessage}>Send</button>
+            <button
+                onClick={sendMessage}
+                className="px-4 py-2 bg-blue-600 text-white rounded"
+            >
+                Send
+            </button>
         </div>
     );
 }
