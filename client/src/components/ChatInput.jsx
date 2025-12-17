@@ -12,10 +12,8 @@ export default function ChatInput({
         socket.emit("sendChannelMessage", {
             serverId,
             channelId,
-            message: {
-                sender: username,
-                text,
-            },
+            text,
+            user,
         });
 
         setText("");
