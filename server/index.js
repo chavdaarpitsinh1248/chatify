@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const Message = require("./models/Message");
 
 const app = express();
 app.use(cors({
@@ -59,23 +60,26 @@ io.use((socket, next) => {
 
 
 io.on("connection", (socket) => {
-    socket.on("joinChannel", ({ serverId, channelId, username }) => {
+    socket.on("joinChannel", ({ serverId, channelId }) => {
         const room = `${serverId}:${channelId}`;
         socket.join(room);
 
-        io.to(room).emit("channelMessage", {
-            sender: "System",
-            text: `${username} joined the channel`,
-            timestamp: new Date(),
-        });
     });
 
-    socket.on("sendChannelMessage", ({ serverId, channelId, message }) => {
-        const room = `${serverId}:${channelId}`;
-        io.to(room).emit("channelMessage", {
-            ...message,
-            id: Date.now(),
-            timestamp: new Date(),
+    socket.on("sendChannelMessage", async ({ serverId, channelId, text, user }) => {
+        const message = await Message.create({
+            serverId,
+            channelId,
+            sender: user.id,
+            senderName: user.username,
+            text,
+        });
+        io.to(`${serverId}:${channelId}`).emit("newChannelMessage", {
+            _id: message._id,
+            text: message.text,
+            senderName: message.senderName,
+            channelId,
+            createdAt: message.createdAt,
         });
     });
 });
