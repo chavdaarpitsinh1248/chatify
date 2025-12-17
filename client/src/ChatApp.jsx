@@ -1,61 +1,48 @@
 import { useEffect, useState } from "react";
-import socket from "./socket";
+import { connectSocket, getSocket } from "./socket";
+import { useAuth } from "./auth/AuthContext";
 
 import ServerList from "./components/ServerList";
 import ChatPanel from "./components/ChatPanel";
 import JoinChat from "./components/JoinChat";
 
 export default function ChatApp() {
-    const [username, setUsername] = useState("");
-    const [token, setToken] = useState(null);
+    const { user, login } = useAuth();
     const [currentServer, setCurrentServer] = useState(null);
+    const [socket, setSocket] = useState(null);
 
-    // Example: restore auth from localStorage (adjust to your auth logic)
+    // Connect socket when user is available
     useEffect(() => {
-        const savedUser = localStorage.getItem("username");
-        const savedToken = localStorage.getItem("token");
-
-        if (savedUser && savedToken) {
-            setUsername(savedUser);
-            setToken(savedToken);
+        if (user?.token && !socket) {
+            const sock = connectSocket(user.token);
+            setSocket(sock);
         }
-    }, []);
+    }, [user]);
 
-    // Join server via socket
     const handleJoinServer = (server) => {
         setCurrentServer(server);
 
-        socket.emit("joinServer", {
+        socket?.emit("joinServer", {
             serverId: server._id,
-            username,
+            user: user.user,
         });
     };
 
-    // If user is NOT authenticated yet
-    if (!username || !token) {
-        return (
-            <JoinChat
-                onJoin={(name, jwtToken) => {
-                    setUsername(name);
-                    setToken(jwtToken);
-                    localStorage.setItem("username", name);
-                    localStorage.setItem("token", jwtToken);
-                }}
-            />
-        );
+    if (!user) {
+        return <JoinChat onJoin={(name, token) => login({ user: { username: name }, token })} />;
     }
 
     return (
         <div className="flex h-screen bg-white">
-            {/* LEFT SIDEBAR — SERVERS */}
-            <ServerList token={token} onSelect={handleJoinServer} />
+            <ServerList token={user.token} onSelect={handleJoinServer} />
 
-            {/* MAIN CHAT AREA */}
-            {currentServer ? (
+            {currentServer && socket ? (
                 <ChatPanel
                     server={currentServer}
-                    username={username}
+                    channel={currentServer.channels[0]} // default first channel
                     socket={socket}
+                    token={user.token}
+                    user={user.user}
                 />
             ) : (
                 <div className="flex-1 flex items-center justify-center text-gray-500">
