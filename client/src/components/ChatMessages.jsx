@@ -4,42 +4,39 @@ import { formatDate } from "../utils/time";
 import { motion, AnimatePresence } from "framer-motion";
 import TypingIndicator from "./TypingIndicator";
 
-
-export default function ChatMessages({ messages, botTyping }) {
+export default function ChatMessages({ messages = [], botTyping }) {
     const bottomRef = useRef(null);
-    const visibleMessage = messages.slice(-50);
+    const visibleMessages = messages.slice(-50);
 
     // auto scroll
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages, botTyping]);
+    }, [messages.length, botTyping]);
 
-    let lastDate = "";
+    let lastRenderedDate = null;
 
     return (
         <>
-            <AnimatePresence>
-                {visibleMessage.map((msg) => {
-                    const currentDate = formatDate(msg.timestamp);
-                    const showDate = currentDate !== lastDate;
-                    lastDate = currentDate;
+            <AnimatePresence initial={false}>
+                {visibleMessages.map((msg) => {
+                    const messageDate = formatDate(msg.createdAt);
+                    const showDate = messageDate !== lastRenderedDate;
+                    lastRenderedDate = messageDate;
 
                     return (
                         <motion.div
-                            key={msg.id}
+                            key={msg._id}
                             layout
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
                         >
                             {showDate && (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="text-center text-xs text-gray-500 my-2"
-                                >
-                                    {currentDate}
-                                </motion.div>
+                                <div className="text-center text-xs text-gray-500 my-2">
+                                    {messageDate}
+                                </div>
                             )}
+
                             <MessageBubble msg={msg} />
                         </motion.div>
                     );
@@ -47,6 +44,7 @@ export default function ChatMessages({ messages, botTyping }) {
 
                 {botTyping && <TypingIndicator />}
             </AnimatePresence>
+
             <div ref={bottomRef} />
         </>
     );
