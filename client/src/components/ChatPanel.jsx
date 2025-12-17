@@ -1,52 +1,45 @@
 import { useEffect, useState } from "react";
-import ChannelList from "./ChannelList";
+import { getChannelMessages } from "../api/messageApi";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 
-export default function ChatPanel({ server, socket, username }) {
-    const [currentChannel, setCurrentChannel] = useState(server.channels[0]);
+export default function ChatPanel({
+    server,
+    channel,
+    socket,
+    token,
+    user,
+}) {
     const [messages, setMessages] = useState([]);
 
+    // Load history
     useEffect(() => {
-        if (!currentChannel) return;
+        if (!channel) return;
+
+        getChannelMessages(server._id, channel._id, token)
+            .then((res) => setMessages(res.data));
 
         socket.emit("joinChannel", {
             serverId: server._id,
-            channelId: currentChannel._id,
-            username,
+            channelId: channel._id,
         });
 
-        setMessages([]);
-
-        socket.on("channelMessage", (msg) => {
+        socket.on("newChannelMessage", (msg) => {
             setMessages((prev) => [...prev, msg]);
         });
 
-        return () => socket.off("channelMessage");
-    }, [currentChannel]);
+        return () => socket.off("newChannelMessage");
+    }, [channel]);
 
     return (
-        <div className="flex flex-1">
-            <ChannelList
-                channels={server.channels}
-                activeChannel={currentChannel}
-                onSelect={setCurrentChannel}
+        <>
+            <ChatMessages messages={messages} />
+            <ChatInput
+                socket={socket}
+                serverId={server._id}
+                channelId={channel._id}
+                user={user}
             />
-
-            <div className="flex-1 flex flex-col">
-                <div className="border-b p-3 font-semibold">
-                    #{currentChannel.name}
-                </div>
-
-                <ChatMessages messages={messages} />
-
-                <ChatInput
-                    socket={socket}
-                    username={username}
-                    serverId={server._id}
-                    channelId={currentChannel._id}
-                />
-            </div>
-        </div>
+        </>
     );
 }
