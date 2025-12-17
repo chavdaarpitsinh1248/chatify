@@ -9,6 +9,7 @@ const MessageSchema = new mongoose.Schema(
         },
         channelId: {
             type: mongoose.Schema.Types.ObjectId,
+            ref: "Channel",
             required: true,
         },
         sender: {
@@ -22,10 +23,12 @@ const MessageSchema = new mongoose.Schema(
         },
         text: {
             type: String,
+            trim: true,
             required: true,
+            maxlength: 2000,
         },
     },
     { timestamps: true }
 );
 
-module.exports = mongoose.model("Message", MessageSchema);
+module.exports = mongoose.model("Message", MessageSchema.index({ serverId: 1, channel: 1 createdAt: 1 }));
