@@ -1,16 +1,18 @@
 import { io } from "socket.io-client";
 
-const stored = localStorage.getItem("user");
-const token = stored ? JSON.parse(stored).token : null;
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
 
 
 let socket = null;
 
 export const connectSocket = (token) => {
-    socket = io("http://localhost:5000", {
+    if (socket) return socket;
+
+    socket = io(SOCKET_URL, {
         auth: { token },
         autoConnect: true,
     });
+
     return socket;
 };
 
@@ -22,4 +24,3 @@ export const disconnectSocket = () => {
         socket = null;
     }
 };
-export default socket;
