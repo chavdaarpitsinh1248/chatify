@@ -1,4 +1,4 @@
-require("dotenv").config(); // Load .env first
+require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -23,10 +23,10 @@ app.use("/api/servers", require("./routes/servers"));
 app.use("/api/protected", require("./routes/protected"));
 app.use("/api/messages", require("./routes/messages"));
 
-// Create HTTP server
+// HTTP server
 const server = http.createServer(app);
 
-// Socket.IO setup
+// Socket.IO
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:5173",
@@ -34,38 +34,38 @@ const io = new Server(server, {
     },
 });
 
-// Connect to MongoDB (Mongoose 7+ requires no options)
+// MongoDB
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("MongoDB connected"))
-    .catch(err => console.error("MongoDB connection error:", err));
+    .catch(err => console.error("MongoDB error:", err));
 
-// Socket.IO authentication middleware
+// Socket auth
 io.use((socket, next) => {
     const token = socket.handshake.auth?.token;
     if (!token) return next(new Error("Authentication error"));
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        socket.user = decoded; // { id, email, username }
+        socket.user = jwt.verify(token, process.env.JWT_SECRET);
         next();
-    } catch (err) {
+    } catch {
         next(new Error("Invalid token"));
     }
 });
 
-// Helper function for room names
-const getRoom = (serverId, channelId) => `${serverId}:${channelId}`;
+// Room helper
+const channelRoom = (channelId) => `channel:${channelId}`;
 
-// Socket.IO events
+// Socket events
 io.on("connection", (socket) => {
 
-    // Join a channel room
-    socket.on("joinChannel", ({ serverId, channelId }) => {
-        const room = getRoom(serverId, channelId);
-        socket.join(room);
+    socket.on("joinChannel", ({ channelId }) => {
+        socket.join(channelRoom(channelId));
     });
 
-    // Send a message to a channel
+    socket.on("leaveChannel", ({ channelId }) => {
+        socket.leave(channelRoom(channelId));
+    });
+
     socket.on("sendChannelMessage", async ({ serverId, channelId, text }) => {
         if (!text || text.trim().length === 0 || text.length > 2000) return;
 
@@ -78,7 +78,7 @@ io.on("connection", (socket) => {
                 text: text.trim(),
             });
 
-            io.to(getRoom(serverId, channelId)).emit("newChannelMessage", {
+            io.to(channelRoom(channelId)).emit("newChannelMessage", {
                 _id: message._id,
                 text: message.text,
                 senderName: message.senderName,
@@ -86,7 +86,7 @@ io.on("connection", (socket) => {
                 createdAt: message.createdAt,
             });
         } catch (err) {
-            console.error("Error saving message:", err);
+            console.error("Message save error:", err);
         }
     });
 });
